@@ -1,0 +1,83 @@
+---
+# XyzenSun/rclone fork 的发布 workflow。
+#
+# 为什么需要这个文件：上游 build.yml 的所有发布路径都被
+# github.repository == 'rclone/rclone' 条件与官方私有 secret 锁死，
+# fork 上永远不会发布产物，因此本 fork 通过此新增文件（上游不存在同名
+# 文件，merge 时零冲突）把交叉编译产物发布到自己仓库的 GitHub Releases。
+#
+# 发布方式：push 形如 zen-v1.76.0 的 tag。tag 前缀 zen- 用于与官方
+# v1.76.0 格式的 tag 区分，避免同步上游后 tag 混淆；二进制内的版本字符串
+# 为 v1.76.0-zen（VERSION 文件本身不改动，仍与官方保持一致）。
+#
+# 手动 workflow_dispatch 触发时只做全平台交叉编译验证并将产物上传为
+# Actions artifact，不创建 Release。
+#
+# 交叉编译复用官方 bin/cross-compile.go，-release current 会额外生成
+# rclone-current-<os>-<arch>.zip 固定名副本，供 zen-docs/install.sh 以
+# releases/latest/download/ 固定 URL 下载，无需调用 GitHub API。
+# 构建为纯 Go（CGO 默认禁用），linux 上 mount 走 nfsmount/mount2 实现。
+
+name: zen-release
+
+on:
+  push:
+    tags:
+      - 'zen-v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Install Go
+        uses: actions/setup-go@v7
+        with:
+          go-version: '~1.27.0'
+          check-latest: true
+
+      # deb/rpm 打包由 cross-compile.go 调用 nfpm 完成，与官方
+      # Makefile 的 release_dep_linux target 使用同一安装命令
+      - name: Install nfpm
+        run: go install github.com/goreleaser/nfpm/v2/cmd/nfpm@latest
+
+      - name: Compute version
+        id: version
+        run: |
+          if [[ "$GITHUB_REF_TYPE" == "tag" ]]; then
+            # zen-v1.76.0 -> v1.76.0-zen
+            version="v${GITHUB_REF_NAME#zen-v}-zen"
+          else
+            version="$(cat VERSION)-zen.dev.$(git rev-parse --short HEAD)"
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "Version: $version"
+
+      - name: Cross compile all platforms
+        run: |
+          go run bin/cross-compile.go -release current "${{ steps.version.outputs.version }}"
+
+      - name: Upload to GitHub Release
+        # 仅 tag 触发时发布，手动触发不创建 Release
+        if: startsWith(github.ref, 'refs/tags/zen-v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: build/*
+          generate_release_notes: true
+
+      - name: Upload build artifacts
+        # 手动触发时留存产物供下载验证
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: rclone-build
+          path: build/
