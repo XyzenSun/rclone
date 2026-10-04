@@ -1,0 +1,22 @@
+backend: github
+name: GitHub
+tier: Tier 3
+maintainers: Community
+features_score: 3
+integration_tests: None
+data_integrity: Other
+performance: Medium
+adoption: None
+docs: Basic
+security: High
+virtual: false
+remote: 'TestGithub:'
+features:
+- CanHaveEmptyDirectories
+- Copy
+- DirMove
+- ListR
+- Move
+hashes:
+- gitsha1
+precision: 3153600000000000000

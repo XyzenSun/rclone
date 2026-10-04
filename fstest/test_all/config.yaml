@@ -178,6 +178,9 @@ backends:
  - backend:  "gofile"
    remote:   "TestGoFile:"
    fastlist: true
+ - backend: "github"
+   remote:   "TestGithub:"
+   fastlist: true
  - backend: "filen"
    remote:   "TestFilen:"
    fastlist: false
