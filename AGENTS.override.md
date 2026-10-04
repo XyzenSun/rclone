@@ -56,6 +56,14 @@ RCLONE_CONFIG="/notfound" go test ./...   # 全量单元测试，无需云凭据
 golangci-lint run ./...           # lint，与 CI 一致
 ```
 
+## 测试策略
+
+- 单测克制：单元测试只覆盖纯算法与纯函数（hash 对拍、路径工具、流式拼接的边界等），禁止 mock HTTP 层或 API 行为——mock 出来的协议假设没有验证价值。
+- 真实凭证优先：backend 的行为验证一律用真实凭证跑编译产物（`./rclone` + `RCLONE_CONFIG_<REMOTE>_<OPTION>` 环境变量传凭证，凭证不写入任何文件、不入库），配合 `-vv` 与 `--dump bodies` 从请求/响应日志反推代码缺陷。
+- 协议存疑 curl 隔离：对上游协议行为有疑问时，先用 curl 复现最小请求序列确认事实（约束、缓存行为、错误语义），拿到结论再写代码；禁止在代码里边猜边试。
+- fstests 即契约：动手写 backend 前先通读 `fstest/fstests/fstests.go` 中相关测试段，Mkdir("")/Move/DirMove/NewObject 等接口语义在测试里都有明确断言，以测试为准而非注释直觉。
+- 配额预算：API 型 backend 的 fstests 单轮约消耗数千次请求，验收前先估算配额，完整验收控制在单个限流窗口内，避免多轮连跑打爆限额。
+
 ## 架构参考
 
 涉及分层设计、包间引用关系、后端注册机制、环境变量优先级等疑问时，先读 `zen-docs/rclone架构与分层设计.md`，其中包含经源码验证的完整结论与关键文件路径。
