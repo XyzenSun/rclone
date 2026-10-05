@@ -390,6 +390,12 @@ backends:
  #   fastlist: true
  #   ignore:
  #     - TestIntegration/FsMkdir/FsPutFiles/FsCopy
+ - backend:  "baidupcs"
+   remote:   "TestBaidupcs:"
+   fastlist: false
+   ignore:
+    # 百度网盘服务端硬性拒绝空文件上传，实测无变体可用
+    - TestIntegration/FsMkdir/FsPutZeroLength
  - backend:  "yandex"
    remote:   "TestYandex:"
    fastlist: false

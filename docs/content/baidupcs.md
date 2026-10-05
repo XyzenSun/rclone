@@ -1,0 +1,231 @@
+---
+title: "Baidu Netdisk"
+description: "Rclone docs for Baidu Netdisk (百度网盘)"
+versionIntroduced: "v1.76"
+---
+
+# {{< icon "fa fa-cloud" >}} Baidu Netdisk (百度网盘)
+
+[Baidu Netdisk](https://pan.baidu.com/) (百度网盘) is the personal cloud
+storage service of Baidu, accessed here through the
+[open platform API](https://pan.baidu.com/union/) (pan.baidu.com/union).
+
+Paths are specified as `remote:path`, and may be as deep as required,
+e.g. `remote:directory/subdirectory`.
+
+## Prerequisites
+
+You need your own application on the Baidu Netdisk open platform:
+
+1. Sign up at the [open platform console](https://pan.baidu.com/union/console)
+   and create an application. This requires completing developer
+   verification (个人开发者认证).
+2. Note the application's AppKey and SecretKey - the wizard asks for them.
+3. Note the application's 产品名称 (product name) - it determines your
+   root directory, see below.
+
+Applications that have passed Baidu's review are rate-limit whitelisted.
+Unreviewed applications are subject to a documented limit of 10 requests
+per hour, which makes them effectively unusable for anything beyond
+occasional testing.
+
+## Root directory
+
+Fill the `root` option with the full path `/apps/{产品名称}`, for
+example `/apps/WordAgent` for an application whose product name is
+WordAgent. Entering just the app name would create a top-level
+directory outside the application area - that works today while the
+API still allows full access, but Baidu's permission policy is
+expected to confine applications to `/apps/{产品名称}` and may
+tighten in the future. The directory is created automatically on
+first use if it doesn't exist.
+
+There is no API to look up the product name of an application, so you
+have to copy it from the console yourself.
+
+## Configuration
+
+Here is an example of making a remote for Baidu Netdisk.
+
+First run:
+
+```console
+rclone config
+```
+
+This will guide you through an interactive setup process. After entering
+the AppKey, SecretKey and root directory, the wizard asks how to
+authorize:
+
+```text
+Select the authorization method
+Choose a number from below, or type in your own string value.
+ 1 / Open a URL in a browser and paste the authorization code it shows (no console configuration needed)
+   \ (oob)
+ 2 / Run a temporary web server on http://localhost:53682/ and wait for the redirect (register http://localhost:53682/ as a redirect URI in the console first)
+   \ (callback)
+config_auth_method>
+```
+
+### oob authorization (default)
+
+Choose `oob` and open the URL shown in a browser. Sign in with the Baidu
+account that owns the files, approve the application, and paste the
+authorization code shown on the resulting page:
+
+```text
+config_oob_code> xxxxxxxxxxxxxxxx
+```
+
+This path works without any console configuration and is suitable for
+headless machines.
+
+### Local callback server
+
+Choose `callback` if you prefer the browser to hand the code over
+automatically. You must first register `http://localhost:53682/` as a
+redirect URI in the open platform console. Note that Baidu compares
+the redirect URI exactly - including the trailing slash - so the
+registered value must be precisely `http://localhost:53682/`. rclone
+starts a temporary web server on that port and waits up to 5 minutes
+for the redirect.
+
+If you are configuring rclone on a remote machine, forward the port
+first, for example:
+
+```console
+ssh -L 53682:localhost:53682 <remote>
+```
+
+If the redirect fails (for example the browser cannot reach
+localhost:53682 because rclone runs on another machine), the wizard
+also accepts the full URL pasted from the browser address bar, which
+contains the code.
+
+### Token lifetime
+
+The access token is valid for 30 days and the refresh token for 10
+years. The refresh token is single-use: every refresh rotates it, and a
+failed refresh invalidates it. rclone serializes refreshes and writes
+the new tokens back to the config file, but if a refresh does fail
+(for example because the same application was authorized elsewhere and
+the token was consumed), you need to re-run `rclone config` and
+authorize again.
+
+### Modified time
+
+Note that rclone can only set the modification time of a file when
+uploading it (via the API's `local_mtime` parameter). The modification
+time of existing files can't be changed, so `--checksum` is not
+supported and sync comparisons use size and modification time with
+second precision.
+
+## Limitations
+
+The Baidu API does not allow uploading zero-length files. Uploading an
+empty file fails with an explicit error.
+
+The MD5 values returned by Baidu's listing API are not reliable, so this
+backend provides no hashes.
+
+Upload slices are sized by account type: 4MB for regular accounts, 16MB
+for regular members and 32MB for super members, with at most 1024
+slices per file. The number of concurrent slice uploads is controlled
+by the `upload_concurrency` option.
+
+<!-- autogenerated options start - DO NOT EDIT - instead edit fs.RegInfo in backend/baidupcs/baidupcs.go and run make backenddocs to verify --> <!-- markdownlint-disable-line line-length -->
+### Standard options
+
+Here are the Standard options specific to baidupcs (Baidu Netdisk (百度网盘)).
+
+#### --baidupcs-app-key
+
+AppKey (client_id) of your Baidu Netdisk open platform application.
+
+Create an application in the open platform console (https://pan.baidu.com/union/console) and paste its AppKey here.
+
+Properties:
+
+- Config:      app_key
+- Env Var:     RCLONE_BAIDUPCS_APP_KEY
+- Type:        string
+- Required:    true
+
+#### --baidupcs-app-secret
+
+SecretKey (client_secret) of your Baidu Netdisk open platform application.
+
+Properties:
+
+- Config:      app_secret
+- Env Var:     RCLONE_BAIDUPCS_APP_SECRET
+- Type:        string
+- Required:    true
+
+#### --baidupcs-root
+
+Application directory path on the server.
+
+Fill in the full path including the /apps/ prefix, for example
+/apps/WordAgent where WordAgent is the 产品名称 (product name) of
+your application. Entering just the app name would create a
+top-level directory outside the application area - that works
+today while the API still allows full access, but Baidu's
+permission policy is expected to confine applications to
+/apps/{产品名称} and may tighten in the future.
+
+The directory is created automatically on first use if it doesn't
+exist.
+
+Properties:
+
+- Config:      root
+- Env Var:     RCLONE_BAIDUPCS_ROOT
+- Type:        string
+- Default:     "/apps/"
+- Examples:
+  - "/apps/WordAgent"
+    - Application directory (recommended: /apps/ + 产品名称 from the console)
+
+### Advanced options
+
+Here are the Advanced options specific to baidupcs (Baidu Netdisk (百度网盘)).
+
+#### --baidupcs-upload-concurrency
+
+Number of concurrent slice uploads.
+
+Each file upload is split into slices (4/16/32MB depending on account type) which are uploaded concurrently. 1 to 32.
+
+Properties:
+
+- Config:      upload_concurrency
+- Env Var:     RCLONE_BAIDUPCS_UPLOAD_CONCURRENCY
+- Type:        int
+- Default:     3
+
+#### --baidupcs-encoding
+
+The encoding for the backend.
+
+See the [encoding section in the overview](/overview/#encoding) for more info.
+
+Properties:
+
+- Config:      encoding
+- Env Var:     RCLONE_BAIDUPCS_ENCODING
+- Type:        Encoding
+- Default:     Slash,LtGt,DoubleQuote,Colon,Question,Asterisk,Pipe,BackSlash,Del,Ctl,RightSpace,RightPeriod,InvalidUtf8,Dot
+
+#### --baidupcs-description
+
+Description of the remote.
+
+Properties:
+
+- Config:      description
+- Env Var:     RCLONE_BAIDUPCS_DESCRIPTION
+- Type:        string
+- Required:    false
+
+<!-- autogenerated options stop -->

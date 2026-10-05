@@ -1,0 +1,21 @@
+backend: baidupcs
+name: Baidu Netdisk (百度网盘)
+tier: Tier 3
+maintainers: Community
+features_score: 2
+integration_tests: Disabled
+data_integrity: Modtime
+performance: Medium
+adoption: Some use
+docs: Full
+security: High
+virtual: false
+remote: 'TestBaidupcs:'
+features:
+- About
+- CanHaveEmptyDirectories
+- Copy
+- DirMove
+- Move
+hashes: []
+precision: 3153600000000000000
