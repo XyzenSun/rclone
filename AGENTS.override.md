@@ -33,6 +33,7 @@ zen-docs/  fork 的私有笔记（已跟踪入库）
 
 新增 backend 时只触碰以下位置，除此之外的改动需要先与用户确认：
 
+- 动手前先重读 `zen-docs/经验.md`，并 `grep -rn 踩坑 backend/` 扫一遍既有实现的注释，把历史教训变成检查清单（baidupcs 交付时重犯了 github 已记录的 encoder 全角点教训并造成目录被替换，教训见该文档）。
 - `backend/<name>/`：全新目录，包含 `<name>.go`（init + fs.Register + Options struct + Fs/Object 实现）、`api/types.go`、`<name>_test.go`。实现规范遵循上游 CONTRIBUTING.md 的 "Writing a new backend"：目录型参考 box，桶型参考 b2；不拆 fs.go/object.go；HTTP 型优先用 lib/rest + fs/fshttp；路径编码用 lib/encoder；上传缓冲用 lib/multipart/lib/pool。
 - `backend/all/all.go`：按字母序插入一行 blank import。
 - `docs/data/backends/<name>.yaml`：必须创建，否则 fs.Register 启动时报 internal error。
