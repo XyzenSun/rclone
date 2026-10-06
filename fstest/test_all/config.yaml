@@ -130,6 +130,64 @@ backends:
      - TestRWFileHandleWriteNoWrite
    ignoretests:
      - cmd/gitannex
+ - backend:  "cmcloud"
+   remote:   "TestCmcloud:"
+   fastlist: true
+   ignore:
+    # 以下失败全部源于两条平台硬限制（真实凭证 fstests 实测确认，
+    # 见 zen-docs/cmcloud backend设计.md 第 10 节）：
+    # 1. 删除端点被服务端屏蔽（01000005）：Remove/Rmdir 返回错误，
+    #    所有依赖清理的用例（FsEncoding/FsPutChunked/FsPutRetry 的
+    #    Remove 收尾、FsMkdirRmdirSubdir/FsRmdirEmpty 及其连锁的
+    #    FsListDirEmpty/FsListRDirEmpty）失败；上传/编码往返本身全部
+    #    正确（失败输出中的名字均与预期一致）
+    # 2. 平台无覆盖语义：FsPutFiles 的更新已存在文件用例报
+    #    "file exists and the platform can't overwrite files"
+    - TestIntegration/FsMkdir/FsEncoding/URL_encoding
+    - TestIntegration/FsMkdir/FsEncoding/control_chars
+    - TestIntegration/FsMkdir/FsEncoding/dot
+    - TestIntegration/FsMkdir/FsEncoding/dot_dot
+    - TestIntegration/FsMkdir/FsEncoding/invalid_UTF-8
+    - TestIntegration/FsMkdir/FsEncoding/leading_CR
+    - TestIntegration/FsMkdir/FsEncoding/leading_HT
+    - TestIntegration/FsMkdir/FsEncoding/leading_LF
+    - TestIntegration/FsMkdir/FsEncoding/leading_VT
+    - TestIntegration/FsMkdir/FsEncoding/leading_dot
+    - TestIntegration/FsMkdir/FsEncoding/leading_space
+    - TestIntegration/FsMkdir/FsEncoding/leading_tilde
+    - TestIntegration/FsMkdir/FsEncoding/punctuation
+    - TestIntegration/FsMkdir/FsEncoding/trailing_CR
+    - TestIntegration/FsMkdir/FsEncoding/trailing_HT
+    - TestIntegration/FsMkdir/FsEncoding/trailing_LF
+    - TestIntegration/FsMkdir/FsEncoding/trailing_VT
+    - TestIntegration/FsMkdir/FsEncoding/trailing_dot
+    - TestIntegration/FsMkdir/FsEncoding/trailing_space
+    - TestIntegration/FsMkdir/FsListDirEmpty
+    - TestIntegration/FsMkdir/FsListRDirEmpty
+    - TestIntegration/FsMkdir/FsMkdirRmdirSubdir
+    - TestIntegration/FsMkdir/FsPutChunked/10Mi/10485759
+    - TestIntegration/FsMkdir/FsPutChunked/10Mi/10485760
+    - TestIntegration/FsMkdir/FsPutChunked/10Mi/20971521
+    - TestIntegration/FsMkdir/FsPutChunked/5.054Mi/10600001
+    - TestIntegration/FsMkdir/FsPutChunked/5.054Mi/5299999
+    - TestIntegration/FsMkdir/FsPutChunked/5.054Mi/5300000
+    - TestIntegration/FsMkdir/FsPutChunked/5.055Mi/10600107
+    - TestIntegration/FsMkdir/FsPutChunked/5.055Mi/5300052
+    - TestIntegration/FsMkdir/FsPutChunked/5.055Mi/5300053
+    - TestIntegration/FsMkdir/FsPutChunked/5Mi/10485761
+    - TestIntegration/FsMkdir/FsPutChunked/5Mi/5242879
+    - TestIntegration/FsMkdir/FsPutChunked/5Mi/5242880
+    - TestIntegration/FsMkdir/FsPutChunked/6.667Mi/13981013
+    - TestIntegration/FsMkdir/FsPutChunked/6.667Mi/6990505
+    - TestIntegration/FsMkdir/FsPutChunked/6.667Mi/6990506
+    - TestIntegration/FsMkdir/FsPutChunked/8Mi/16777217
+    - TestIntegration/FsMkdir/FsPutChunked/8Mi/8388607
+    - TestIntegration/FsMkdir/FsPutChunked/8Mi/8388608
+    - TestIntegration/FsMkdir/FsPutFiles
+    - TestIntegration/FsMkdir/FsPutRetry/Chunked/NetError
+    - TestIntegration/FsMkdir/FsPutRetry/Chunked/Status500
+    - TestIntegration/FsMkdir/FsPutZeroLength
+    - TestIntegration/FsRmdirEmpty
  - backend:  "combine"
    remote:   "TestCombine:dir1"
    fastlist: false

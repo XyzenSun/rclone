@@ -121,6 +121,7 @@ WebDAV or S3, that work out of the box.)
 {{< provider name="Baidu Netdisk (百度网盘)" home="https://pan.baidu.com/" config="/baidupcs/" >}}
 {{< provider name="Box" home="https://www.box.com/" config="/box/" >}}
 {{< provider name="Ceph" home="http://ceph.com/" config="/s3/#ceph" >}}
+{{< provider name="China Mobile Cloud (中国移动云盘)" home="https://yun.139.com/" config="/cmcloud/" >}}
 {{< provider name="China Mobile Ecloud Elastic Object Storage (EOS)" home="https://ecloud.10086.cn/home/product-introduction/eos/" config="/s3/#china-mobile-ecloud-eos" >}}
 {{< provider name="Arvan Cloud Object Storage (AOS)" home="https://www.arvancloud.ir/en/products/cloud-storage" config="/s3/#arvan-cloud-object-storage-aos" >}}
 {{< provider name="Citrix ShareFile" home="http://sharefile.com/" config="/sharefile/" >}}

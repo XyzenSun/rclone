@@ -33,6 +33,7 @@ directories to and from different cloud storage providers.
 - Baidu Netdisk (百度网盘) [:page_facing_up:](https://rclone.org/baidupcs/)
 - Box [:page_facing_up:](https://rclone.org/box/)
 - Ceph [:page_facing_up:](https://rclone.org/s3/#ceph)
+- China Mobile Cloud (中国移动云盘) [:page_facing_up:](https://rclone.org/cmcloud/)
 - China Mobile Ecloud Elastic Object Storage (EOS) [:page_facing_up:](https://rclone.org/s3/#china-mobile-ecloud-eos)
 - Citrix ShareFile [:page_facing_up:](https://rclone.org/sharefile/)
 - Cloudflare R2 [:page_facing_up:](https://rclone.org/s3/#cloudflare-r2)

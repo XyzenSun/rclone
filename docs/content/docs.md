@@ -35,6 +35,7 @@ See the following for detailed instructions for
 - [Amazon S3](/s3/)
 - [Backblaze B2](/b2/)
 - [Baidu Netdisk (百度网盘)](/baidupcs/)
+- [China Mobile Cloud (中国移动云盘)](/cmcloud/)
 - [Box](/box/)
 - [Chunker](/chunker/) - transparently splits large files for other remotes
 - [Citrix ShareFile](/sharefile/)
