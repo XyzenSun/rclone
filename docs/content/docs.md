@@ -97,6 +97,7 @@ See the following for detailed instructions for
 - [Union](/union/)
 - [Uloz.to](/ulozto/)
 - [WebDAV](/webdav/)
+- [WoPan (China Unicom Cloud Disk)](/wopan/)
 - [Yandex Disk](/yandex/)
 - [Zoho WorkDrive](/zoho/)
 - [The local filesystem](/local/)

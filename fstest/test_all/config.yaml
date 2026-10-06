@@ -454,6 +454,13 @@ backends:
    ignore:
     # 百度网盘服务端硬性拒绝空文件上传，实测无变体可用
     - TestIntegration/FsMkdir/FsPutZeroLength
+ - backend:  "wopan"
+   remote:   "TestWopan:"
+   fastlist: false
+   ignore:
+    # 联通的 upload2C 接口不接受 0 字节分片（服务端 400），
+    # 已实测多种变体均无解，属服务端硬限制
+    - TestIntegration/FsMkdir/FsPutZeroLength
  - backend:  "yandex"
    remote:   "TestYandex:"
    fastlist: false

@@ -1,0 +1,25 @@
+backend: wopan
+name: WoPan (China Unicom Cloud Disk)
+tier: Tier 3
+maintainers: Community
+features_score: 2
+integration_tests: Disabled
+data_integrity: Modtime
+performance: Medium
+adoption: Some use
+docs: Full
+security: High
+virtual: false
+remote: 'TestWopan:'
+features:
+- About
+- CanHaveEmptyDirectories
+- CleanUp
+- Copy
+- DirCacheFlush
+- DirMove
+- Move
+- Purge
+- PublicLink
+hashes: []
+precision: 3153600000000000000

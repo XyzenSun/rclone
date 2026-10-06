@@ -226,6 +226,7 @@ WebDAV or S3, that work out of the box.)
 {{< provider name="US3" home="https://www.ucloud.cn/site/product/ufile.html" config="/s3/#us3" >}}
 {{< provider name="Wasabi" home="https://wasabi.com/" config="/s3/#wasabi" >}}
 {{< provider name="WebDAV" home="https://en.wikipedia.org/wiki/WebDAV" config="/webdav/" >}}
+{{< provider name="WoPan (China Unicom Cloud Disk)" home="https://pan.wo.cn/" config="/wopan/" >}}
 {{< provider name="Yandex Disk" home="https://disk.yandex.com/" config="/yandex/" >}}
 {{< provider name="Zadara Object Storage" home="https://www.zadara.com" config="/s3/#zadara" >}}
 {{< provider name="Zero Services (ZERO-Z3)" home="https://lp.zeroservices.eu/zero-z3/" config="/s3/#zero-z3" >}}

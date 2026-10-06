@@ -110,6 +110,8 @@ require (
 	storj.io/uplink v1.14.3
 )
 
+require github.com/OpenListTeam/wopan-sdk-go v0.1.5
+
 require (
 	cloud.google.com/go/auth v0.23.1 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.8 // indirect
