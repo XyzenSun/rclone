@@ -129,6 +129,11 @@ type Fs struct {
 	pacer    *fs.Pacer
 	vipType  int // 0 普通/1 会员/2 超会，决定上传分片规格
 	tokenMu  sync.Mutex
+	// mkdirMu 串行化 mkdirServer 的探测+创建。并发调用方（sync 建目录、
+	// 每个传输的 Update 兜底建父目录）会在目录首次创建的窗口内同时探测到
+	// 缺失并重复 create；百度 create 对已存在路径返回 errno 0 并静默生成
+	// {name}_{timestamp} 空副本，必须靠锁消除这个进程内竞态
+	mkdirMu sync.Mutex
 }
 
 // Object is a remote object that has been stat'd
@@ -590,6 +595,11 @@ func (f *Fs) mkdirServer(ctx context.Context, srvPath string) error {
 	if srvPath == "" || srvPath == "/" {
 		return nil
 	}
+	// 探测与创建必须整体持锁：锁只挡进程内并发（sync 建目录与各传输的
+	// mkParentDir 同时触发），百度 list 对刚创建目录的可见性延迟无法
+	// 在客户端消除，但同一进程内串行后，后来者会探测到先行者建好的目录
+	f.mkdirMu.Lock()
+	defer f.mkdirMu.Unlock()
 	// 从完整路径向上找到最深的存在前缀，missing 自底向上收集
 	var missing []string
 	cur := srvPath
