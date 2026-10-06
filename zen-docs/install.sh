@@ -5,7 +5,7 @@
 # -release current 生成），结构与官方 docs/content/install.sh 保持一致。
 #
 # 用法：
-#   sudo -v ; curl -fsSL https://raw.githubusercontent.com/XyzenSun/rclone/master/zen-docs/install.sh | sudo bash
+#   sudo -v ; curl -fsSL https://raw.githubusercontent.com/XyzenSun/rclone/zen/zen-docs/install.sh | sudo bash
 #
 # 与官方脚本的差异：下载源改为本 fork 的 GitHub Release；去掉了
 # "已安装最新版本则跳过"的检查，因为 GitHub 没有 version.txt 端点，
