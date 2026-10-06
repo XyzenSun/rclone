@@ -4,34 +4,36 @@
 
 ## 项目定位
 
-这是对 rclone/rclone 的个人 fork，长期目标只有一个：在保持与官方最大兼容的前提下新增自用 backend。所有工程决策都服务于"官方更新时可以直接 merge"这一前提。
+这是对 rclone/rclone 的长期自用 fork, 不计划向上游提交代码或请求上游接纳自用改动. 日常开发与发布都以 `zen` 分支为准, 定期通过 merge 获取上游更新. 工程决策优先控制与上游的差异, 降低同步成本, 同时允许按自用需求调整功能.
 
 ## 核心约束（最高优先级，与全局规范冲突时以本节为准）
 
-版本号与官方保持一致：`VERSION` 文件跟随上游，不自行修改，不打自定义 tag，构建版本信息完全由上游状态决定。
+版本与发布: `VERSION` 文件跟随上游, 不自行修改. 允许使用 `zen-v*` 作为 fork 专用发布 tag, 与官方 `v*` tag 区分. 保留现有 `zen-release.yml` 发布机制: 发布构建附加 `-zen` 标识, 手动构建附加 `-zen.dev.<commit>` 标识. 发布 tag 必须指向已验证的 `zen` 提交, 不移动或覆盖已有 tag.
 
-尽量同步官方：上游同步统一通过 GitHub 进行（fork 页面 Sync fork 或 PR），本地不添加 upstream remote。master 分支保持与上游一致，魔改一律在长期分支（如 `zen`）上进行，需要发布时再合入。
+分支与远端: `zen` 是长期开发、默认与发布分支. `origin` 指向 `XyzenSun/rclone`, 用于推送自用改动; `upstream` 指向 `rclone/rclone`, 仅用于获取更新并配置禁用 push 的 URL. 上游同步直接将 `upstream/master` merge 到 `zen`, 不要求经过本地 `master`, 不向上游提交 PR. 已发布的 `zen` 历史保持不变, 不通过 rebase 或强推整理同步历史.
 
-尽量兼容官方：改动面最小化是硬性要求。上游高频变更的核心代码一律不碰，具体禁区见下文。
+历史 `master` 暂时保留, 它已有 fork 自用提交, 当前不作为纯上游镜像使用. 不自动 reset、删除或改写其历史. 将来需要整理它时另行确认.
 
-CLI 命令完全不变：不新增、修改、删除任何子命令、全局 flag、配置文件格式、环境变量语义与 rc API；现有 backend 的行为保持原样。用户侧配置与命令行用法与官方二进制完全一致。
+兼容与改动范围: 默认保持官方 CLI、配置格式、环境变量语义、rc API 与现有 backend 行为. 自用需求确需调整这些行为或核心层时, 先与用户确认范围, 说明兼容性变化与后续同步成本, 获得批准后再实施. 优先在自用 backend 内解决问题, 避免扩大核心层差异.
+
+同步前必须确认当前分支与工作区状态. 工作区有未提交改动时暂停 merge, 不自动 stash、reset 或丢弃改动. 合并冲突逐项分析, 不批量选择 ours/theirs. 合并后按实际影响范围构建与验证, 全量测试仍需用户批准. commit 与 push 分别遵循用户授权, 不因完成合并而自动执行.
 
 ## 目录结构
 
 ```
-backend/   70 个存储后端；all/all.go 是 blank import 聚合入口；新增 backend 的唯一主要改动区
-cmd/       CLI 子命令，cmd/all 聚合；本 fork 禁改
-fs/        核心抽象（接口/Features/注册表/全局参数）；本 fork 禁改
+backend/   存储后端; all/all.go 是 blank import 聚合入口; 自用 backend 的主要改动区
+cmd/       CLI 子命令, cmd/all 聚合; 调整前确认兼容性与同步成本
+fs/        核心抽象(接口/Features/注册表/全局参数); 调整前确认兼容性与同步成本
 lib/       基础库（rest/oauthutil/encoder/multipart/pool 等），新 backend 优先复用
 fstest/    集成测试框架
-vfs/       mount 虚拟文件系统；本 fork 禁改
+vfs/       mount 虚拟文件系统; 调整前确认兼容性与同步成本
 docs/      文档；data/backends/*.yaml 是 backend 元数据（被 embed 进二进制）
 zen-docs/  fork 的私有笔记（已跟踪入库）
 ```
 
-## 允许的改动范围（新增 backend 的固定触点）
+## 新增 backend 的常用触点
 
-新增 backend 时只触碰以下位置，除此之外的改动需要先与用户确认：
+新增 backend 默认将改动集中在以下位置. 超出这些触点时先与用户确认理由与范围. fork 专用规则、维护文档、安装脚本与发布 workflow 也可按已批准的维护需求调整, 上游 `AGENTS.md` 与 `CLAUDE.md` 继续保留原样.
 
 - 动手前先重读 `zen-docs/经验.md`，并 `grep -rn 踩坑 backend/` 扫一遍既有实现的注释，把历史教训变成检查清单（baidupcs 交付时重犯了 github 已记录的 encoder 全角点教训并造成目录被替换，教训见该文档）。
 - `backend/<name>/`：全新目录，包含 `<name>.go`（init + fs.Register + Options struct + Fs/Object 实现）、`api/types.go`、`<name>_test.go`。实现规范遵循上游 CONTRIBUTING.md 的 "Writing a new backend"：目录型参考 box，桶型参考 b2；不拆 fs.go/object.go；HTTP 型优先用 lib/rest + fs/fshttp；路径编码用 lib/encoder；上传缓冲用 lib/multipart/lib/pool。
@@ -41,9 +43,11 @@ zen-docs/  fork 的私有笔记（已跟踪入库）
 - `fstest/test_all/config.yaml`：追加测试注册段。
 - `zen-docs/`：笔记与设计文档。
 
-## 禁改区与替代方案
+## 核心层改动与同步成本
 
-`fs/`、`fs/operations`、`fs/sync`、`fs/config/`、`vfs/`、`cmd/` 及所有现有 `backend/*` 均为禁改区，这些是上游高频变更区或行为兼容承诺的载体。需要新能力时，通过新 backend 自身的 Options 与 Features 表达，而不是修改核心层；需要调整参数默认值时，通过环境变量在部署侧完成，而不是改代码。
+`fs/`、`fs/operations`、`fs/sync`、`fs/config/`、`vfs/`、`cmd/` 与上游已有 `backend/*` 变更频繁, 对它们的自用改动会增加后续合并与回归验证成本. 这些目录允许按已批准的需求修改, 实施前必须说明改动范围、兼容性影响与同步风险.
+
+新能力优先通过自用 backend 的 Options 与 Features 表达, 共用能力优先复用现有库与接口. 参数默认值优先通过部署环境变量调整, 简单配置需求不引入核心代码差异.
 
 参数默认值的调整方式：全局 flag 用 `RCLONE_<FLAG>`（如 `RCLONE_TRANSFERS=8`），backend 类型级默认用 `RCLONE_<BACKEND>_<OPTION>`（如 `RCLONE_BOX_UPLOAD_CUTOFF=100M`），具体 remote 实例用 `RCLONE_CONFIG_<REMOTE>_<OPTION>`。环境变量是默认值级别，命令行与配置文件中更具体的设置仍然优先。
 
